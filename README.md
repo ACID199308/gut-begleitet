@@ -87,3 +87,9 @@ In Xcode unter „Signing & Capabilities“ die eigene Apple-ID beziehungsweise 
 Unter GitHub Actions wird auf einem macOS-Runner ein unsignierter **Simulator-Build** erzeugt, im iPhone-Simulator gestartet und die lokale Speicherung geprüft. Ein Simulator-Paket ist **nicht auf einem echten iPhone installierbar** und keine IPA für TestFlight. Eine signierte Geräteversion setzt passende Apple-Signierungsdaten und einen Mac-/Xcode-Bauweg voraus. Eine Apple-ID auf dem iPhone allein ersetzt diesen Schritt nicht.
 
 Offizielle Hinweise: [Xcode – App auf einem Gerät starten](https://help.apple.com/xcode/mac/current/en.lproj/dev5a825a1ca.html). Es wurde kein kostenpflichtiges Apple-Konto eröffnet und nichts an Apple zur Veröffentlichung gesendet.
+
+### iPhone-Paket für eigene Signierung
+
+GitHub Actions baut zusätzlich ein unsigniertes arm64-Gerätepaket: `GutBegleitet-iOS-unsigniert.ipa`. Dieses Paket läuft auf einem echten iPhone erst nach persönlicher Apple-Signierung. Es ist keine direkt installierbare oder für TestFlight freigegebene Datei. Der Simulator-Test ersetzt keinen Test der Kamera und Dateiauswahl auf einem echten iPhone.
+
+Ohne eigenen Mac ist beispielsweise eine persönliche Installation über [AltStore Classic und Windows](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows) möglich. Dazu richtet man AltServer auf dem Windows-PC ein und importiert die IPA anschließend in AltStore auf dem verbundenen iPhone. Die Apple-Anmeldung erfolgt dabei selbst in AltServer/AltStore; Zugangsdaten gehören nicht ins Repository oder in den Chat. Bei einem kostenlosen Apple-Konto muss die Freigabe nach sieben Tagen erneuert werden ([AltStore-Hinweise](https://faq.altstore.io/altstore-classic/your-altstore)). AltServer wird zum Installieren/Erneuern benötigt; Gut begleitet selbst benötigt im Betrieb keinen Server. Dieser Installationsweg wurde hier nicht auf einem echten iPhone getestet.

@@ -31,6 +31,17 @@ jobs:
         run: |
           mkdir -p build
           xcodebuild -project ios/GutBegleitet.xcodeproj -scheme GutBegleitet -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO build > build/ios-build.log 2>&1 || { tail -n 140 build/ios-build.log; exit 1; }
+      - name: Build unsigned iPhone app
+        run: |
+          xcodebuild -project ios/GutBegleitet.xcodeproj -scheme GutBegleitet -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build/ios-device CODE_SIGNING_ALLOWED=NO build > build/ios-device-build.log 2>&1 || { tail -n 140 build/ios-device-build.log; exit 1; }
+          node scripts/package-ios-device.mjs
+      - name: Save unsigned iPhone package
+        uses: actions/upload-artifact@v4
+        with:
+          name: GutBegleitet-iOS-Geraet-unsigniert
+          path: build/GutBegleitet-iOS-unsigniert.ipa
+          if-no-files-found: error
+          retention-days: 14
       - name: Run on iPhone simulator
         run: node scripts/smoke-ios.mjs
       - name: Save simulator app and verification
@@ -43,4 +54,5 @@ jobs:
             build/ios-simulator*.png
             build/ios-smoke-result.json
             build/ios-build.log
+            build/ios-device-build.log
           retention-days: 14
