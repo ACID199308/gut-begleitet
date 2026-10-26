@@ -1,0 +1,12 @@
+package de.acid199308.gutbegleitet;
+import android.app.Activity;
+import android.graphics.*;
+import android.graphics.pdf.PdfRenderer;
+import android.os.*;
+import android.widget.*;
+public class PdfActivity extends Activity {
+    PdfRenderer renderer;ParcelFileDescriptor descriptor;ImageView image;TextView count;Bitmap bitmap;int index=0;
+    @Override public void onCreate(Bundle state){super.onCreate(state);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(16,32,16,16);root.setBackgroundColor(Color.rgb(247,248,243));TextView title=new TextView(this);title.setText(getIntent().getStringExtra("title"));title.setTextSize(18);root.addView(title);LinearLayout bar=new LinearLayout(this);Button prev=new Button(this);prev.setText("← Zurück");Button next=new Button(this);next.setText("Weiter →");count=new TextView(this);bar.addView(prev);bar.addView(count);bar.addView(next);root.addView(bar);ScrollView scroll=new ScrollView(this);image=new ImageView(this);image.setAdjustViewBounds(true);scroll.addView(image);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);try{descriptor=getContentResolver().openFileDescriptor(getIntent().getData(),"r");renderer=new PdfRenderer(descriptor);prev.setOnClickListener(v->{if(index>0){index--;showPage();}});next.setOnClickListener(v->{if(index+1<renderer.getPageCount()){index++;showPage();}});showPage();}catch(Exception e){Toast.makeText(this,"PDF konnte nicht geöffnet werden.",Toast.LENGTH_LONG).show();finish();}}
+    void showPage(){try(PdfRenderer.Page page=renderer.openPage(index)){int width=Math.min(1400,getResources().getDisplayMetrics().widthPixels);int height=Math.max(1,(int)((float)page.getHeight()/page.getWidth()*width));if(height>3000){width=width*3000/height;height=3000;}Bitmap next=Bitmap.createBitmap(Math.max(width,1),height,Bitmap.Config.ARGB_8888);next.eraseColor(Color.WHITE);page.render(next,null,null,PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);image.setImageBitmap(next);if(bitmap!=null)bitmap.recycle();bitmap=next;count.setText(" "+(index+1)+" / "+renderer.getPageCount()+" ");}catch(Exception e){Toast.makeText(this,"Seite konnte nicht angezeigt werden.",Toast.LENGTH_LONG).show();}}
+    @Override protected void onDestroy(){if(renderer!=null)renderer.close();if(descriptor!=null)try{descriptor.close();}catch(Exception e){}if(bitmap!=null)bitmap.recycle();super.onDestroy();}
+}
