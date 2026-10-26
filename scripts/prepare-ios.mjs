@@ -1,5 +1,5 @@
 import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const input=path.join(root,'web/index.html');const output=path.join(root,'ios/GutBegleitet/Resources/index.html');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');const input=path.join(root,'web/index.html');const output=path.join(root,'ios/GutBegleitet/WebContent/index.html');
 let html=fs.readFileSync(input,'utf8');
 html=html.replaceAll("localStorage.getItem('weiter-demo')","window.GutBegleitetIOSStorage.getItem('weiter-demo')").replaceAll("localStorage.setItem('weiter-demo',","window.GutBegleitetIOSStorage.setItem('weiter-demo',");
 html=html.replaceAll('in diesem Browser auf diesem Gerät','in dieser App auf diesem iPhone').replaceAll('in diesem Browser','in dieser App').replaceAll('diesem Browser','dieser App').replaceAll('Beim Löschen der Browserdaten','Beim Löschen der App-Daten').replaceAll('Kein Upload auf die Synology und keine Synchronisierung.','Kein Server und keine Synchronisierung.').replaceAll('Speicherplatz oder Browserberechtigung','Speicherplatz oder App-Berechtigung').replaceAll('Die Kameraauswahl hängt vom Smartphone und Browser ab.','Die Kameraauswahl erfolgt auf deinem iPhone.');

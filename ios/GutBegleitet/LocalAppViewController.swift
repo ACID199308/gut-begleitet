@@ -43,7 +43,7 @@ final class LocalAppViewController: UIViewController, WKNavigationDelegate, WKUI
             documentsFolder = root.appendingPathComponent("Documents", isDirectory: true)
             try FileManager.default.createDirectory(at: documentsFolder, withIntermediateDirectories: true)
             if let data = try? Data(contentsOf: root.appendingPathComponent("documents.json")), let stored = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] { documents = stored }
-            guard let file = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "Resources") else { throw CocoaError(.fileNoSuchFile) }
+            guard let file = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "WebContent") else { throw CocoaError(.fileNoSuchFile) }
             indexURL = file
             let stateURL = root.appendingPathComponent("state.json")
             let saved = (try? String(contentsOf: stateURL, encoding: .utf8)) ?? ""

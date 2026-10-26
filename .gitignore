@@ -22,3 +22,5 @@ xcuserdata/
 *.p8
 *.pfx
 *.ipa
+
+ios/GutBegleitet/WebContent/index.html
