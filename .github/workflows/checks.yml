@@ -15,7 +15,7 @@ jobs:
       - run: node scripts/prepare-ios.mjs
       - run: node scripts/check-ios.mjs
   ios-simulator:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
