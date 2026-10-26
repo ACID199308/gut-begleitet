@@ -38,7 +38,7 @@ run(jar,['uf',path.join(build,'base.apk'),'-C',path.join(build,'dex'),'classes.d
 run(zipalign,['-f','-p','4',path.join(build,'base.apk'),path.join(build,'aligned.apk')]);
 const store=process.env.GUT_KEYSTORE;
 if(!store||!process.env.GUT_KEYSTORE_PASSWORD)throw Error('Zum Signieren GUT_KEYSTORE und GUT_KEYSTORE_PASSWORD setzen. Private Schlüssel nie veröffentlichen.');
-const output=path.join(root,'dist','gut-begleitet-1.0.0.apk');
+const output=path.join(root,'dist','gut-begleitet-1.0.1.apk');
 run(java,['-jar',path.join(tools,'lib','apksigner.jar'),'sign','--ks',store,'--ks-key-alias','gutbegleitet','--ks-pass','env:GUT_KEYSTORE_PASSWORD','--key-pass','env:GUT_KEYSTORE_PASSWORD','--out',output,path.join(build,'aligned.apk')]);
 run(java,['-jar',path.join(tools,'lib','apksigner.jar'),'verify','--verbose',output]);
 console.log('Installierbare APK: '+output);

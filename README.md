@@ -4,13 +4,13 @@ Eine lokale Android-App für Betroffene und Angehörige: Krankheiten verstehen, 
 
 ## Android installieren
 
-[Signierte APK herunterladen](https://github.com/ACID199308/gut-begleitet/raw/refs/heads/main/install/gut-begleitet-1.0.0.apk)
+[Signierte APK herunterladen](https://github.com/ACID199308/gut-begleitet/raw/refs/heads/main/install/gut-begleitet-1.0.1.apk)
 
 1. APK auf das Smartphone laden und öffnen.
 2. Falls Android danach fragt, die Installation aus dieser Quelle zulassen.
 3. „Gut begleitet“ öffnen. Es werden kein Konto und kein eigener Server benötigt.
 
-Voraussetzung: Android 8.0 oder neuer mit aktuellem Android System WebView. Die APK ist für Android; für iPhones wird eine gesonderte iOS-App benötigt.
+Voraussetzung: Android 8.0 oder neuer mit aktuellem Android System WebView. Die APK ist für Android. Das iOS-Projekt für iPhone und iPad liegt unter `ios/`; die Installation auf einem echten Gerät benötigt eine Apple-Signierung.
 
 ## Lokal statt Hintergrundserver
 
@@ -71,3 +71,19 @@ Die medizinischen und sozialrechtlichen Informationen dienen der Orientierung un
 ## Quellen und Rechte
 
 Die Inhalte enthalten Links zu ihren offiziellen Grundlagen. Eingebettete amtliche PDF-Vorlagen sind unveränderte Fremddokumente; deren Rechte und Quellenangaben bleiben erhalten. Die Veröffentlichung dieses Repositorys vergibt für diese Dokumente keine zusätzliche Lizenz. Für den Projektcode wurde bislang keine gesonderte Open-Source-Lizenz ausgewählt.
+
+## iOS-App
+
+Die gleiche lokale Oberfläche ist als iOS-App mit Swift und WKWebView enthalten, einschließlich des App-Icons. Persönliche Angaben und Dokumente werden über eine native lokale Ablage gespeichert. PDF-/Bildvorschauen laufen mit Quick Look; Datei-Exporte mit der iOS-Dateiauswahl und Kalendereinträge mit EventKitUI. Es gibt keinen lokalen Webserver, kein Backend und keinen verpflichtenden Online-Login. Externe Quellen öffnen nur auf Wunsch in einer anderen App.
+
+```sh
+node scripts/build-web.mjs
+node scripts/prepare-ios.mjs
+open ios/GutBegleitet.xcodeproj
+```
+
+In Xcode unter „Signing & Capabilities“ die eigene Apple-ID beziehungsweise das eigene Team wählen. Das Projekt verwendet keine fremden Zertifikate. Die mitgelieferte Kennung `de.acid199308.gutbegleitet` muss bei Bedarf für das eigene Team angepasst werden.
+
+Unter GitHub Actions wird auf einem macOS-Runner ein unsignierter **Simulator-Build** erzeugt, im iPhone-Simulator gestartet und die lokale Speicherung geprüft. Ein Simulator-Paket ist **nicht auf einem echten iPhone installierbar** und keine IPA für TestFlight. Eine signierte Geräteversion setzt passende Apple-Signierungsdaten und einen Mac-/Xcode-Bauweg voraus. Eine Apple-ID auf dem iPhone allein ersetzt diesen Schritt nicht.
+
+Offizielle Hinweise: [Xcode – App auf einem Gerät starten](https://help.apple.com/xcode/mac/current/en.lproj/dev5a825a1ca.html). Es wurde kein kostenpflichtiges Apple-Konto eröffnet und nichts an Apple zur Veröffentlichung gesendet.

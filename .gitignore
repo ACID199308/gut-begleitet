@@ -12,3 +12,13 @@ local.properties
 .env
 .env.*
 web/index.html
+
+ios/GutBegleitet/Resources/index.html
+ios/build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.mobileprovision
+*.p8
+*.pfx
+*.ipa

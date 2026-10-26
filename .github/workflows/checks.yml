@@ -12,3 +12,35 @@ jobs:
           node-version: '22'
       - run: node scripts/build-web.mjs
       - run: node scripts/check.mjs
+      - run: node scripts/prepare-ios.mjs
+      - run: node scripts/check-ios.mjs
+  ios-simulator:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare local iOS content
+        run: |
+          node scripts/build-web.mjs
+          node scripts/prepare-ios.mjs
+          node scripts/check-ios.mjs
+      - name: Build iOS app without signing
+        run: |
+          mkdir -p build
+          xcodebuild -project ios/GutBegleitet.xcodeproj -scheme GutBegleitet -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO build > build/ios-build.log 2>&1 || { tail -n 140 build/ios-build.log; exit 1; }
+      - name: Run on iPhone simulator
+        run: node scripts/smoke-ios.mjs
+      - name: Save simulator app and verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GutBegleitet-iOS-Simulator
+          path: |
+            build/GutBegleitet-iOS-Simulator.zip
+            build/ios-simulator*.png
+            build/ios-smoke-result.json
+            build/ios-build.log
+          retention-days: 14
