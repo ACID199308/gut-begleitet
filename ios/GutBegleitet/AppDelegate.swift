@@ -16,7 +16,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 import LocalAuthentication
-import Security
 
 /// A separate native window covers the complete app, including presented document viewers.
 final class AppPrivacyLock: NSObject {
@@ -26,28 +25,28 @@ final class AppPrivacyLock: NSObject {
     private var promptOnActive = true
     private var authenticating = false
     private var context: LAContext?
-    private let account = "device-app-lock"
-    private var query: [String: Any] { [kSecClass as String:kSecClassGenericPassword,kSecAttrService as String:"de.acid199308.gutbegleitet.security",kSecAttrAccount as String:account] }
+    private func settingsURL() throws -> URL {
+        let base=try FileManager.default.url(for:.applicationSupportDirectory,in:.userDomainMask,appropriateFor:nil,create:true)
+        return base.appendingPathComponent("GutBegleitetSecurity",isDirectory:true).appendingPathComponent("app-lock")
+    }
     var enabled: Bool {
-        var q=query;q[kSecReturnData as String]=true;q[kSecMatchLimit as String]=kSecMatchLimitOne
-        var result: CFTypeRef?;let status=SecItemCopyMatching(q as CFDictionary,&result)
-        if status == errSecItemNotFound { return false }
-        guard status == errSecSuccess, let data=result as? Data else { NSLog("App-Sperre: Schlüsselbund nicht verfügbar (OSStatus %d)", status); return true }
-        return data == Data([1])
+        do {let data=try Data(contentsOf:settingsURL());guard data.count == 1 else{return true};return data != Data([0])}
+        catch {let failure=error as NSError;if failure.domain == NSCocoaErrorDomain && failure.code == NSFileReadNoSuchFileError {return false};NSLog("App-Sperre: Einstellung nicht lesbar (%d)",failure.code);return true}
     }
     var accessible: Bool { !enabled || !locked }
     func status() -> [String: Any] { let c=LAContext();return ["enabled":enabled,"available":c.canEvaluatePolicy(.deviceOwnerAuthentication,error:nil)] }
     private func persist(_ value: Bool) -> Bool {
-        let attributes: [String:Any]=[kSecValueData as String:Data([value ? 1 : 0]),kSecAttrAccessible as String:kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
-        let existing=SecItemUpdate(query as CFDictionary,attributes as CFDictionary)
-        if existing == errSecSuccess {return true}
-        if existing != errSecItemNotFound {return false}
-        return SecItemAdd(query.merging(attributes){_,new in new} as CFDictionary,nil) == errSecSuccess
+        do {
+            let file=try settingsURL();var folder=file.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at:folder,withIntermediateDirectories:true,attributes:[.protectionKey:FileProtectionType.complete])
+            var values=URLResourceValues();values.isExcludedFromBackup=true;try folder.setResourceValues(values)
+            try Data([value ? 1 : 0]).write(to:file,options:[.atomic,.completeFileProtection]);return true
+        } catch {return false}
     }
     func coverContents() {
         guard enabled else {return}
         if cover == nil {
-            let window=UIWindow(frame:UIScreen.main.bounds);window.windowLevel=UIWindow.Level(rawValue:UIWindow.Level.alert.rawValue+1)
+            let window=UIWindow(frame:UIScreen.main.bounds);window.windowLevel=UIWindow.Level(rawValue:UIWindow.Level.statusBar.rawValue+1)
             let controller=UIViewController();controller.view.backgroundColor=UIColor(red:247/255,green:248/255,blue:243/255,alpha:1)
             let title=UILabel();title.text="Gut begleitet\nDeine App ist gesperrt";title.numberOfLines=0;title.textAlignment = .center;title.font = .preferredFont(forTextStyle:.title2)
             let button=UIButton(type:.system);button.setTitle("App entsperren",for:.normal);button.addTarget(self,action:#selector(unlockTapped),for:.touchUpInside)
