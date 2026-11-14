@@ -55,6 +55,7 @@ final class AppPrivacyLock: NSObject {
             NSLayoutConstraint.activate([stack.centerXAnchor.constraint(equalTo:controller.view.centerXAnchor),stack.centerYAnchor.constraint(equalTo:controller.view.centerYAnchor),stack.leadingAnchor.constraint(greaterThanOrEqualTo:controller.view.leadingAnchor,constant:24),stack.trailingAnchor.constraint(lessThanOrEqualTo:controller.view.trailingAnchor,constant:-24)])
             window.rootViewController=controller;cover=window
         }
+        (UIApplication.shared.delegate as? AppDelegate)?.window?.endEditing(true)
         cover?.isHidden=false
         (UIApplication.shared.delegate as? AppDelegate)?.window?.accessibilityElementsHidden=true
     }

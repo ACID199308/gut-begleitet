@@ -94,7 +94,9 @@ final class LocalAppViewController: UIViewController, WKNavigationDelegate, WKUI
             if let data = try? JSONSerialization.data(withJSONObject: message.body) { try? data.write(to: root.appendingPathComponent("smoke-result.json"), options: .atomic) }; return
         }
         guard let body = message.body as? [String: Any], let id = body["id"] as? String, let action = body["action"] as? String else { return }
-        guard AppPrivacyLock.shared.accessible || action == "appLockStatus" else { reply(id, false, "Bitte zuerst die App entsperren."); return }
+        // Pending autosaves and transfer cleanup must finish even when the privacy cover is shown.
+        // These actions cannot read documents or alter the separate native lock preference.
+        guard AppPrivacyLock.shared.accessible || ["appLockStatus", "persistState", "cancelTransfer"].contains(action) else { reply(id, false, "Bitte zuerst die App entsperren."); return }
         let payload = body["payload"] as? [String: Any] ?? [:]
         do {
             switch action {
