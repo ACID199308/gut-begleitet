@@ -32,7 +32,7 @@ final class AppPrivacyLock: NSObject {
         var q=query;q[kSecReturnData as String]=true;q[kSecMatchLimit as String]=kSecMatchLimitOne
         var result: CFTypeRef?;let status=SecItemCopyMatching(q as CFDictionary,&result)
         if status == errSecItemNotFound { return false }
-        guard status == errSecSuccess, let data=result as? Data else { return true }
+        guard status == errSecSuccess, let data=result as? Data else { NSLog("App-Sperre: Schlüsselbund nicht verfügbar (OSStatus %d)", status); return true }
         return data == Data([1])
     }
     var accessible: Bool { !enabled || !locked }

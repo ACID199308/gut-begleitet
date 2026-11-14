@@ -43,6 +43,8 @@ jobs:
           path: build/GutBegleitet-iOS-unsigniert.ipa
           if-no-files-found: error
           retention-days: 14
+      - name: Sign simulator for local Keychain checks
+        run: node scripts/sign-ios-simulator.mjs
       - name: Run on iPhone simulator
         run: node scripts/smoke-ios.mjs
       - name: Save simulator app and verification
