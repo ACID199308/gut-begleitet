@@ -94,9 +94,14 @@ final class LocalAppViewController: UIViewController, WKNavigationDelegate, WKUI
             if let data = try? JSONSerialization.data(withJSONObject: message.body) { try? data.write(to: root.appendingPathComponent("smoke-result.json"), options: .atomic) }; return
         }
         guard let body = message.body as? [String: Any], let id = body["id"] as? String, let action = body["action"] as? String else { return }
+        guard AppPrivacyLock.shared.accessible || action == "appLockStatus" else { reply(id, false, "Bitte zuerst die App entsperren."); return }
         let payload = body["payload"] as? [String: Any] ?? [:]
         do {
             switch action {
+            case "appLockStatus": reply(id, true, AppPrivacyLock.shared.status())
+            case "setAppLock":
+                guard let enabled = payload["enabled"] as? Bool else { throw CocoaError(.fileReadUnknown) }
+                AppPrivacyLock.shared.change(enabled) { ok in self.reply(id, ok, ok ? AppPrivacyLock.shared.status() : "Einstellung nicht geändert. Bitte Gerätecode und Face ID in den iPhone-Einstellungen prüfen oder erneut bestätigen.") }
             case "persistState":
                 guard let text = payload["json"] as? String, text.utf8.count <= 4*1024*1024, let data = text.data(using: .utf8), (try JSONSerialization.jsonObject(with: data)) is [String: Any] else { throw CocoaError(.fileWriteInvalidFileName) }
                 try data.write(to: root.appendingPathComponent("state.json"), options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]); reply(id, true)

@@ -4,7 +4,7 @@ Eine lokale Android-App für Betroffene und Angehörige: Krankheiten verstehen, 
 
 ## Android installieren
 
-[Signierte APK herunterladen](https://github.com/ACID199308/gut-begleitet/raw/refs/heads/main/install/gut-begleitet-1.0.1.apk)
+[Signierte APK herunterladen](https://github.com/ACID199308/gut-begleitet/raw/refs/heads/main/install/gut-begleitet-1.1.0.apk)
 
 1. APK auf das Smartphone laden und öffnen.
 2. Falls Android danach fragt, die Installation aus dieser Quelle zulassen.
@@ -93,3 +93,9 @@ Offizielle Hinweise: [Xcode – App auf einem Gerät starten](https://help.apple
 GitHub Actions baut zusätzlich ein unsigniertes arm64-Gerätepaket: `GutBegleitet-iOS-unsigniert.ipa`. Dieses Paket läuft auf einem echten iPhone erst nach persönlicher Apple-Signierung. Es ist keine direkt installierbare oder für TestFlight freigegebene Datei. Der Simulator-Test ersetzt keinen Test der Kamera und Dateiauswahl auf einem echten iPhone.
 
 Ohne eigenen Mac ist beispielsweise eine persönliche Installation über [AltStore Classic und Windows](https://faq.altstore.io/altstore-classic/how-to-install-altstore-windows) möglich. Dazu richtet man AltServer auf dem Windows-PC ein und importiert die IPA anschließend in AltStore auf dem verbundenen iPhone. Die Apple-Anmeldung erfolgt dabei selbst in AltServer/AltStore; Zugangsdaten gehören nicht ins Repository oder in den Chat. Bei einem kostenlosen Apple-Konto muss die Freigabe nach sieben Tagen erneuert werden ([AltStore-Hinweise](https://faq.altstore.io/altstore-classic/your-altstore)). AltServer wird zum Installieren/Erneuern benötigt; Gut begleitet selbst benötigt im Betrieb keinen Server. Dieser Installationsweg wurde hier nicht auf einem echten iPhone getestet.
+
+## Optionale App-Sperre (1.1.0)
+
+Im Seitenmenü unter Einstellungen lässt sich die Gerätesperre aktivieren und deaktivieren. Beide Änderungen erfordern eine erfolgreiche Systemauthentifizierung. Die Sperre ist anfänglich ausgeschaltet und kann nur mit eingerichtetem Gerätecode aktiviert werden. iOS verwendet LocalAuthentication mit Face ID/Touch ID oder Gerätecode; Android ab 11 BiometricPrompt mit starker Biometrie oder Gerätecode, auf Android 8–10 den Gerätecode. Nach Abbruch bleiben Inhalte verdeckt und können über „App entsperren“ erneut freigegeben werden. Auch Dokumentvorschauen sind beim Wechsel in den Hintergrund verdeckt. Android verhindert bei aktivierter Sperre Screenshots und Vorschauen; iOS verdeckt die Vorschau im App-Umschalter. Bereits entsperrte iOS-Inhalte können weiterhin als Screenshot erfasst werden.
+
+Die Einstellung liegt in nativen Android-Einstellungen beziehungsweise im lokalen iOS-Schlüsselbund, getrennt von den zurücksetzbaren persönlichen Angaben. Gerätecode und Biometriedaten werden ausschließlich vom Betriebssystem geprüft. Es handelt sich um eine Zugangssperre; sie schützt nicht vor kompromittierten Geräten und verschlüsselt bestehende Dateien nicht zusätzlich mit einem eigenen App-Passwort. Der Browser zeigt die Funktion ausdrücklich als nicht verfügbar. Aktivierung, Abbruch, Hintergrundwechsel, biometrische Entsperrung und Gerätecode-Fallback müssen zusätzlich auf echten Zielgeräten geprüft werden.

@@ -4,6 +4,8 @@
  let serial=0;const pending=new Map();
  window.gutIOSReply=function(id,ok,value){const request=pending.get(id);if(!request)return;pending.delete(id);ok?request.resolve(value):request.reject(new Error(value||'Aktion fehlgeschlagen.'))};
  function request(action,payload={}){return new Promise((resolve,reject)=>{const id=String(++serial);pending.set(id,{resolve,reject});window.webkit.messageHandlers.gutBegleitet.postMessage({id,action,payload})})}
+ window.appLock={status:()=>request('appLockStatus'),setEnabled:enabled=>request('setAppLock',{enabled})};
+ window.refreshAppLockSettings&&window.refreshAppLockSettings();
  async function encodedBlob(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(Error('Datei konnte nicht gelesen werden.'));reader.readAsDataURL(blob)})}
  async function storeBlob(blob,metadata,operation='upload'){
   if(blob.size>20*1024*1024)throw Error('Datei ist größer als 20 MB.');
@@ -34,6 +36,9 @@
   await storeBlob(blob,{id,name:'Smoke.png',type:'image/png',size:3,created:Date.now(),disease:'schlaganfall',diseaseName:'Schlaganfall'});
   const files=await request('listDocuments');if(!files.some(file=>file.id===id))throw Error('Native Ablage fehlgeschlagen.');await request('deleteDocument',{id});
   if(!officialDocumentTemplates.every(t=>t.data.startsWith('data:application/pdf;base64,JVBER')))throw Error('PDF-Vorlagen fehlen.');
-  location.hash='#home';render();return {ok:true,diseases:Object.keys(conditions).length,documents:'native-local',pages:9};
+  const security=await request('appLockStatus');if(typeof security.enabled!=='boolean'||security.enabled)throw Error('Unerwarteter Sperrstatus im frischen Simulator.');
+  if(!security.available){let blocked=false;try{await request('setAppLock',{enabled:true})}catch{blocked=true}if(!blocked||(await request('appLockStatus')).enabled)throw Error('Aktivierung ohne Gerätesperre möglich.');}
+  location.hash='#einstellungen';render();await window.refreshAppLockSettings();if(!document.querySelector('#app-lock-toggle'))throw Error('Sperr-Einstellungen fehlen.');
+  location.hash='#home';render();return {appLockSettings:true,ok:true,diseases:Object.keys(conditions).length,documents:'native-local',pages:9};
  };
 })();

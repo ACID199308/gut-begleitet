@@ -12,6 +12,7 @@ jobs:
           node-version: '22'
       - run: node scripts/build-web.mjs
       - run: node scripts/check.mjs
+      - run: node scripts/check-security.mjs
       - run: node scripts/prepare-ios.mjs
       - run: node scripts/check-ios.mjs
   ios-simulator:

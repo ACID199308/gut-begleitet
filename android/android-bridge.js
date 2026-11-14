@@ -2,6 +2,8 @@
 (function(){
  if(!window.GutBegleitetAndroid)return;
  const bridge=window.GutBegleitetAndroid;
+ window.appLock={status:async()=>JSON.parse(bridge.getAppLockStatus()),setEnabled:async enabled=>bridge.setAppLock(enabled)};
+ window.refreshAppLockSettings&&window.refreshAppLockSettings();
  let busy=false;
  async function transfer(url,name,mime,mode){
   if(busy){bridge.message('Bitte den laufenden Export abwarten.');return}

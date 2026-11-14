@@ -21,7 +21,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppLockActivity {
     static final String HOST="appassets.androidplatform.net";
     static final String START="https://"+HOST+"/assets/index.html";
     static final int FILE_PICK=10, CAMERA_PICK=11, EXPORT_PICK=12;
@@ -92,22 +92,25 @@ public class MainActivity extends Activity {
         }
         if(request==EXPORT_PICK){final Export item=pendingExport;pendingExport=null;if(item==null)return;if(result==RESULT_OK&&data!=null&&data.getData()!=null){final Uri target=data.getData();new Thread(()->{try(InputStream input=new FileInputStream(item.file);OutputStream output=getContentResolver().openOutputStream(target,"w")){if(output==null)throw new IOException();byte[] buffer=new byte[65536];int n;while((n=input.read(buffer))!=-1)output.write(buffer,0,n);notifyUser("Datei gespeichert.");}catch(Exception e){notifyUser("Datei konnte nicht gespeichert werden.");}finally{item.file.delete();}}).start();}else item.file.delete();}
     }
+    @Override void lockStatusChanged(){if(web!=null)web.evaluateJavascript("window.refreshAppLockSettings&&window.refreshAppLockSettings()",null);}
     public class LocalBridge {
+        @JavascriptInterface public String getAppLockStatus(){return appLockStatus();}
+        @JavascriptInterface public void setAppLock(boolean enabled){runOnUiThread(()->changeAppLock(enabled));}
         @JavascriptInterface public synchronized String beginExport(String name,String mime,String mode){
-            if(exports.size()>=2)return "";if(!"download".equals(mode)&&!"preview".equals(mode))return "";
+            if(!appAccessible())return "";if(exports.size()>=2)return "";if(!"download".equals(mode)&&!"preview".equals(mode))return "";
             if(!("application/pdf".equals(mime)||"text/calendar".equals(mime)||mime.startsWith("image/")))return "";
             try {String clean=name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]","_");if(clean.length()>120)clean=clean.substring(clean.length()-120);if(clean.isEmpty())clean="Dokument";
                 File folder=new File(getCacheDir(),"shared/exports");folder.mkdirs();String token=UUID.randomUUID().toString();File file=new File(folder,token+"-"+clean);file.createNewFile();exports.put(token,new Export(file,clean,mime,mode));return token;
             }catch(Exception e){return "";}
         }
-        @JavascriptInterface public synchronized boolean appendExport(String token,String base64){Export item=exports.get(token);if(item==null||base64.length()>262144)return false;try{byte[] bytes=android.util.Base64.decode(base64,android.util.Base64.DEFAULT);if(item.bytes+bytes.length>20L*1024*1024)return false;try(OutputStream out=new FileOutputStream(item.file,true)){out.write(bytes);}item.bytes+=bytes.length;return true;}catch(Exception e){return false;}}
+        @JavascriptInterface public synchronized boolean appendExport(String token,String base64){if(!appAccessible())return false;Export item=exports.get(token);if(item==null||base64.length()>262144)return false;try{byte[] bytes=android.util.Base64.decode(base64,android.util.Base64.DEFAULT);if(item.bytes+bytes.length>20L*1024*1024)return false;try(OutputStream out=new FileOutputStream(item.file,true)){out.write(bytes);}item.bytes+=bytes.length;return true;}catch(Exception e){return false;}}
         @JavascriptInterface public synchronized void cancelExport(String token){Export item=exports.remove(token);if(item!=null)item.file.delete();}
-        @JavascriptInterface public synchronized boolean finishExport(String token){Export item=exports.remove(token);if(item==null||item.bytes==0)return false;runOnUiThread(()->{
+        @JavascriptInterface public synchronized boolean finishExport(String token){if(!appAccessible())return false;Export item=exports.remove(token);if(item==null||item.bytes==0)return false;runOnUiThread(()->{
             if("preview".equals(item.mode)){Uri uri=new Uri.Builder().scheme("content").authority(LocalFileProvider.AUTHORITY).appendPath("exports").appendPath(item.file.getName()).build();Intent intent=new Intent(MainActivity.this,"application/pdf".equals(item.mime)?PdfActivity.class:ImageActivity.class);intent.setData(uri);intent.putExtra("title",item.name);startActivity(intent);}
             else{if(pendingExport!=null){item.file.delete();notifyUser("Bitte zuerst den offenen Speicherdialog schließen.");return;}pendingExport=item;Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType(item.mime);intent.putExtra(Intent.EXTRA_TITLE,item.name);try{startActivityForResult(intent,EXPORT_PICK);}catch(Exception e){pendingExport=null;item.file.delete();notifyUser("Speichern ist auf diesem Gerät nicht verfügbar.");}}
         });return true;}
         @JavascriptInterface public void message(String text){notifyUser(text.length()>200?text.substring(0,200):text);}
-        @JavascriptInterface public void openUrl(String url){Uri uri=Uri.parse(url);runOnUiThread(()->openExternal(uri));}
+        @JavascriptInterface public void openUrl(String url){Uri uri=Uri.parse(url);runOnUiThread(()->{if(appAccessible())openExternal(uri);});}
     }
     @Override public void onBackPressed(){web.evaluateJavascript("(()=>{const d=document.querySelector('dialog[open]');if(d){d.close();return true}return false})()",value->{if("true".equals(value))return;if(web.canGoBack())web.goBack();else finish();});}
     @Override protected void onDestroy(){if(fileCallback!=null)fileCallback.onReceiveValue(null);web.removeJavascriptInterface("GutBegleitetAndroid");web.destroy();super.onDestroy();}

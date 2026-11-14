@@ -11,6 +11,7 @@
 <key>LSRequiresIPhoneOS</key><true/>
 <key>UILaunchScreen</key><dict/>
 <key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string><string>UIInterfaceOrientationLandscapeLeft</string><string>UIInterfaceOrientationLandscapeRight</string></array>
+<key>NSFaceIDUsageDescription</key><string>Entsperre deine persönlichen Angaben und Dokumente mit Face ID, wenn du die App-Sperre aktivierst.</string>
 <key>NSCameraUsageDescription</key><string>Fotografiere auf Wunsch ein Dokument, um es ausschließlich lokal in deiner App abzulegen.</string>
 <key>NSPhotoLibraryUsageDescription</key><string>Wähle auf Wunsch ein Foto oder Dokument für deine lokale Ablage aus.</string>
 <key>NSCalendarsUsageDescription</key><string>Übernimm einen ausgewählten Termin oder eine Fristerinnerung in deinen Kalender.</string>
